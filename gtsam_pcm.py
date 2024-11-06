@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # coding=utf8
 #written by Jason Kim
-
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
@@ -16,22 +15,27 @@ def draw_ellipse(ax, pos, cov, scale=0.5, **kwargs):
     ellipse = Ellipse(xy=pos, width=width, height=height, angle=angle, **kwargs)
     ax.add_patch(ellipse)
 
-# Initialize initial covariances
+# Adjusted initial covariances with more variability for each node
 np.random.seed(42)
 initial_covariances = {
-    'x_i_a': np.array([[0.5 + 0.1 * np.random.randn(), 0.1 * np.random.randn()],
-                       [0.1 * np.random.randn(), 0.5 + 0.1 * np.random.randn()]]),
-    'x_j_a': np.array([[0.6 + 0.1 * np.random.randn(), 0.2 * np.random.randn()],
-                       [0.2 * np.random.randn(), 0.6 + 0.1 * np.random.randn()]]),
-    'x_k_b': np.array([[0.4 + 0.1 * np.random.randn(), 0.15 * np.random.randn()],
-                       [0.15 * np.random.randn(), 0.4 + 0.1 * np.random.randn()]]),
-    'x_l_b': np.array([[0.7 + 0.1 * np.random.randn(), 0.25 * np.random.randn()],
-                       [0.25 * np.random.randn(), 0.7 + 0.1 * np.random.randn()]])
+    'x_i_a': np.array([[0.7 + 0.3 * np.random.rand(), 0.2 * np.random.rand()],
+                       [0.2 * np.random.rand(), 0.5 + 0.3 * np.random.rand()]]),
+    'x_j_a': np.array([[0.9 + 0.4 * np.random.rand(), 0.3 * np.random.rand()],
+                       [0.3 * np.random.rand(), 0.6 + 0.4 * np.random.rand()]]),
+    'x_k_b': np.array([[0.4 + 0.5 * np.random.rand(), 0.15 * np.random.rand()],
+                       [0.15 * np.random.rand(), 0.4 + 0.5 * np.random.rand()]]),
+    'x_l_b': np.array([[0.8 + 0.6 * np.random.rand(), 0.25 * np.random.rand()],
+                       [0.25 * np.random.rand(), 0.7 + 0.5 * np.random.rand()]])
 }
+
+# Ensure each matrix is symmetric (as required for covariance matrices)
+for key in initial_covariances:
+    cov = initial_covariances[key]
+    initial_covariances[key] = (cov + cov.T) / 2  # Symmetrize each matrix
 
 # Scaling factor for covariance reduction
 scaling_factor = 0.8
-num_iterations = 5  # Number of steps to visualize
+num_iterations = 50  # Number of steps to visualize
 
 # Define the initial positions for visualization
 positions = {'x_i_a': (0, 1), 'x_j_a': (1, 1), 'x_k_b': (1, 0), 'x_l_b': (0, 0)}
