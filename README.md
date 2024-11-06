@@ -6,9 +6,9 @@ $\mathcal{C} \left( \mathbf{z}_{ik}^{ab}, \mathbf{z}_{jl}^{ab} \right) = \left\l
 </p>
 
 
-
+<p align="center">
  ![init](init.png)
-
+</p>
  
  ![iter14](iter14.png)
 
