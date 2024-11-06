@@ -25,8 +25,10 @@ Cross-check if this concept is right
 
 
 ---
-Working with ... Estimating Uncertain Spatial Relationships in Robotics
-Studying material with [nano-pgo](https://github.com/gisbi-kim/nano-pgo) of [Giseop Kim](https://github.com/gisbi-kim)
+For those who seek reference
+
+
+Studying PGO concept with [nano-pgo](https://github.com/gisbi-kim/nano-pgo) from [Giseop Kim](https://github.com/gisbi-kim)
 ```
 R. Smith, M. Self and P. Cheeseman,
 "Estimating uncertain spatial relationships in robotics," Proceedings.
