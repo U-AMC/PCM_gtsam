@@ -3,4 +3,7 @@ Visual representation and example of pairwise consistency maximization of factor
 
 
 
- ![example results](init.png)
+ ![init](init.png)
+
+ 
+ ![iter14](iter14.png)
