@@ -13,10 +13,10 @@ $\mathcal{C} \left( \mathbf{z}_{ik}^{ab}, \mathbf{z}_{jl}^{ab} \right) = \left\l
  ![iter14](iter14.png)
 
 ---
-Working with ... 
-https://ieeexplore.ieee.org/document/1087846
+Working with ... Estimating Uncertain Spatial Relationships in Robotics
 ```
-R. Smith, M. Self and P. Cheeseman, "Estimating uncertain spatial relationships in robotics," Proceedings. 1987 IEEE International Conference on Robotics and Automation, Raleigh, NC, USA, 1987, pp. 850-850, doi: 10.1109/ROBOT.1987.1087846. keywords: {Robots},
-
-
+R. Smith, M. Self and P. Cheeseman,
+"Estimating uncertain spatial relationships in robotics," Proceedings.
+ 1987 IEEE International Conference on Robotics and Automation, Raleigh, NC, USA, 1987, pp. 850-850,
+ doi: 10.1109/ROBOT.1987.1087846. keywords: {Robots},
 ```
