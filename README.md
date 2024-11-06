@@ -5,15 +5,11 @@ Equation shows as following :
 $\mathcal{C} \left( \mathbf{z}_{ik}^{ab}, \mathbf{z}_{jl}^{ab} \right) = \left\lVert \left( \ominus \mathbf{z}_{ik}^{ab} \right) \oplus \hat{\mathbf{x}}_{ij}^{a} \oplus \mathbf{z}_{jl}^{ab} \oplus \hat{\mathbf{x}}_{lk}^{b} \right\rVert_{\Sigma} \triangleq \left\lVert \boldsymbol{\epsilon}_{ikjl} \right\rVert_{\Sigma_{ikjl}}$
 </p>
 
-
-
- ![init](init.png)
+### Networkx Version of Covariance Propagation
 <p align="center">
   <img src="figure/propagation.png" />
 </p>
  
- ![iter14](iter14.png)
-
 ---
 Working with ... Estimating Uncertain Spatial Relationships in Robotics
 ```
