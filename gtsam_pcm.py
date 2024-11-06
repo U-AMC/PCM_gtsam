@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# coding=utf8
-#written by Jason Kim
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
@@ -71,7 +68,7 @@ for iteration in range(num_iterations):
     # Add intra- and inter-robot factors (edges)
     graph.add(gtsam.BetweenFactorPoint2(keys['x_i_a'], keys['x_j_a'], gtsam.Point2(1, 0), intra_robot_noise))
     graph.add(gtsam.BetweenFactorPoint2(keys['x_k_b'], keys['x_l_b'], gtsam.Point2(-1, 0), intra_robot_noise))
-    graph.add(gtsam.BetweenFactorPoint2(keys['x_i_a'], keys['x_k_b'], gtsam.Point2(1, -1), inter_robot_noise))
+    graph.add(gtsam.BetweenFactorPoint2(keys['x_k_b'], keys['x_i_a'], gtsam.Point2(1, -1), inter_robot_noise))
     graph.add(gtsam.BetweenFactorPoint2(keys['x_j_a'], keys['x_l_b'], gtsam.Point2(0, -1), inter_robot_noise))
 
     # Optimize
