@@ -1,106 +1,63 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
-import gtsam
-from gtsam import symbol
+import networkx as nx
 
-# Function to draw ellipses based on covariance matrices
+# Define a function to draw ellipses based on covariance matrices
 def draw_ellipse(ax, pos, cov, scale=0.5, **kwargs):
+    """Draw an ellipse representing a scaled covariance matrix."""
     eigenvalues, eigenvectors = np.linalg.eigh(cov)
     angle = np.degrees(np.arctan2(*eigenvectors[:, 0][::-1]))
     width, height = 2 * scale * np.sqrt(eigenvalues)
     ellipse = Ellipse(xy=pos, width=width, height=height, angle=angle, **kwargs)
     ax.add_patch(ellipse)
 
-# Adjusted initial covariances with more variability for each node
+# Initialize initial covariances for each state node
 np.random.seed(42)
-initial_covariances = {
-    'x_i_a': np.array([[0.7 + 0.3 * np.random.rand(), 0.2 * np.random.rand()],
-                       [0.2 * np.random.rand(), 0.5 + 0.3 * np.random.rand()]]),
-    'x_j_a': np.array([[0.9 + 0.4 * np.random.rand(), 0.3 * np.random.rand()],
-                       [0.3 * np.random.rand(), 0.6 + 0.4 * np.random.rand()]]),
-    'x_k_b': np.array([[0.4 + 0.5 * np.random.rand(), 0.15 * np.random.rand()],
-                       [0.15 * np.random.rand(), 0.4 + 0.5 * np.random.rand()]]),
-    'x_l_b': np.array([[0.8 + 0.6 * np.random.rand(), 0.25 * np.random.rand()],
-                       [0.25 * np.random.rand(), 0.7 + 0.5 * np.random.rand()]])
-}
-
-# Ensure each matrix is symmetric (as required for covariance matrices)
-for key in initial_covariances:
-    cov = initial_covariances[key]
-    initial_covariances[key] = (cov + cov.T) / 2  # Symmetrize each matrix
+initial_cov_x_i_a = np.array([[0.5 + 0.1 * np.random.randn(), 0.1 * np.random.randn()],
+                              [0.1 * np.random.randn(), 0.5 + 0.1 * np.random.randn()]])
+initial_cov_x_j_a = np.array([[0.6 + 0.1 * np.random.randn(), 0.2 * np.random.randn()],
+                              [0.2 * np.random.randn(), 0.6 + 0.1 * np.random.randn()]])
+initial_cov_x_k_b = np.array([[0.4 + 0.1 * np.random.randn(), 0.15 * np.random.randn()],
+                              [0.15 * np.random.randn(), 0.4 + 0.1 * np.random.randn()]])
+initial_cov_x_l_b = np.array([[0.7 + 0.1 * np.random.randn(), 0.25 * np.random.randn()],
+                              [0.25 * np.random.randn(), 0.7 + 0.1 * np.random.randn()]])
 
 # Scaling factor for covariance reduction
 scaling_factor = 0.8
-num_iterations = 50  # Number of steps to visualize
+num_iterations = 100 # Number of steps to visualize
 
-# Define the initial positions for visualization
-positions = {'x_i_a': (0, 1), 'x_j_a': (1, 1), 'x_k_b': (1, 0), 'x_l_b': (0, 0)}
+# Define graph structure
+G = nx.DiGraph()
+nodes = ["x_i^a", "x_j^a", "x_k^b", "x_l^b"]
+edges = [("x_i^a", "x_j^a", {"label": "intra-robot A"}),
+         ("x_k^b", "x_l^b", {"label": "intra-robot B"}),
+         ("x_k^b", "x_i^a", {"label": "z_ik^ab"}),
+         ("x_j^a", "x_l^b", {"label": "z_jl^ab"})]
+G.add_nodes_from(nodes)
+G.add_edges_from(edges)
+pos = {"x_i^a": (0, 1), "x_j^a": (1, 1), "x_k^b": (1, 0), "x_l^b": (0, 0)}
 
-# Define symbolic keys for each node
-keys = {
-    'x_i_a': symbol('a', 0),  # 'a' represents robot A, 0 is the unique index
-    'x_j_a': symbol('a', 1),  # 'a' for robot A, 1 as index
-    'x_k_b': symbol('b', 0),  # 'b' represents robot B, 0 as index
-    'x_l_b': symbol('b', 1)   # 'b' for robot B, 1 as index
-}
-
-# Define measurement noise models
-intra_robot_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1, 0.1]))
-inter_robot_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.15, 0.15]))
-
-# Set up the initial estimate for each node
-initial_estimate = gtsam.Values()
-for key in keys.values():
-    initial_estimate.insert(key, gtsam.Point2(0, 0))  # Assuming initial (0,0) for simplicity
-
-# Iterate to create and optimize the graph at each step
+# Sequential plots showing covariance propagation
 for iteration in range(num_iterations):
-    # Create a new factor graph for each iteration to update prior covariances
-    graph = gtsam.NonlinearFactorGraph()
-
-    # Scale covariance for each prior to simulate reduction in uncertainty
-    for node, key in keys.items():
-        scaled_cov = initial_covariances[node] * (scaling_factor ** iteration)
-        noise_model = gtsam.noiseModel.Gaussian.Covariance(scaled_cov)
-        graph.add(gtsam.PriorFactorPoint2(key, gtsam.Point2(0, 0), noise_model))
-
-    # Add intra- and inter-robot factors (edges)
-    graph.add(gtsam.BetweenFactorPoint2(keys['x_i_a'], keys['x_j_a'], gtsam.Point2(1, 0), intra_robot_noise))
-    graph.add(gtsam.BetweenFactorPoint2(keys['x_k_b'], keys['x_l_b'], gtsam.Point2(-1, 0), intra_robot_noise))
-    graph.add(gtsam.BetweenFactorPoint2(keys['x_k_b'], keys['x_i_a'], gtsam.Point2(1, -1), inter_robot_noise))
-    graph.add(gtsam.BetweenFactorPoint2(keys['x_j_a'], keys['x_l_b'], gtsam.Point2(0, -1), inter_robot_noise))
-
-    # Optimize
-    optimizer = gtsam.LevenbergMarquardtOptimizer(graph, initial_estimate)
-    result = optimizer.optimize()
-
-    # Plot current state
     fig, ax = plt.subplots(figsize=(8, 8))
+    nx.draw(G, pos, with_labels=True, node_size=1000, node_color="lightblue", font_size=7, font_weight="bold", ax=ax)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels={(u, v): d["label"] for u, v, d in G.edges(data=True)}, ax=ax)
     ax.set_title(f"Covariance Propagation - Iteration {iteration + 1}")
 
-    # Draw connections (edges) between nodes
-    for (start, end) in [('x_i_a', 'x_j_a'), ('x_k_b', 'x_l_b'), ('x_i_a', 'x_k_b'), ('x_j_a', 'x_l_b')]:
-        ax.plot(
-            [positions[start][0], positions[end][0]], 
-            [positions[start][1], positions[end][1]], 
-            'k--', linewidth=1, label=f"{start} to {end}" if iteration == 0 else ""
-        )
+    # Scale each covariance to simulate reduction in uncertainty
+    current_cov_x_i_a = initial_cov_x_i_a * (scaling_factor ** iteration)
+    current_cov_x_j_a = initial_cov_x_j_a * (scaling_factor ** iteration)
+    current_cov_x_k_b = initial_cov_x_k_b * (scaling_factor ** iteration)
+    current_cov_x_l_b = initial_cov_x_l_b * (scaling_factor ** iteration)
 
-    # Extract marginal covariances and draw ellipses
-    marginals = gtsam.Marginals(graph, result)
-    for node, key in keys.items():
-        mean = positions[node]
-        covariance = marginals.marginalCovariance(key)
-        draw_ellipse(ax, mean, covariance, scale=0.5, edgecolor='blue', facecolor='none', linestyle='-', linewidth=2)
+    # Draw ellipses for each state
+    draw_ellipse(ax, pos["x_i^a"], current_cov_x_i_a, scale=0.5, edgecolor='blue', facecolor='none', linestyle='-', linewidth=2)
+    draw_ellipse(ax, pos["x_j^a"], current_cov_x_j_a, scale=0.5, edgecolor='green', facecolor='none', linestyle='-', linewidth=2)
+    draw_ellipse(ax, pos["x_k^b"], current_cov_x_k_b, scale=0.5, edgecolor='red', facecolor='none', linestyle='-', linewidth=2)
+    draw_ellipse(ax, pos["x_l^b"], current_cov_x_l_b, scale=0.5, edgecolor='purple', facecolor='none', linestyle='-', linewidth=2)
 
-    # Draw nodes
-    for node, (x, y) in positions.items():
-        ax.plot(x, y, 'o', markersize=10, label=node)
-        ax.text(x + 0.05, y + 0.05, node, fontsize=12, ha='right')
-
-    # Set plot limits and labels
+    # Set plot limits and show
     ax.set_xlim(-0.5, 1.5)
     ax.set_ylim(-0.5, 1.5)
-    ax.legend(loc="upper left")
     plt.show()
