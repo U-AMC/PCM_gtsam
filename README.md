@@ -21,6 +21,7 @@ $\mathcal{C} \left( \mathbf{z}_{ik}^{ab}, \mathbf{z}_{jl}^{ab} \right) = \left\l
 
 ### TODO
 Update version with symforce
+
 Cross-check if this concept is right 
 
 
