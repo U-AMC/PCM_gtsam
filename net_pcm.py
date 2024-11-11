@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 from networkx.algorithms.clique import find_cliques
 import itertools
 
+# Set random seed for consistency
+np.random.seed(42)
+
 # Step 1: Import Loop Pair Information
 def import_loop_pairs(loop_queue):
     """
@@ -33,7 +36,7 @@ def generate_adjacency_matrix(loop_queue, pcm_threshold=5.0, intensity=1.0):
         v = np.array([intensity] * 6)
         m_cov = np.diag(v)
         res_pose = [ij + jk + kl - il for ij, jk, kl, il in zip(inner_ij, inter_jk, inner_kl, inter_il)]
-        res_vec = np.array(res_pose)
+        res_vec = np.array(res_pose, dtype=np.float64)
         return np.sqrt(res_vec.T @ m_cov @ res_vec)
 
     for i, j in itertools.combinations(range(loop_count), 2):
@@ -123,7 +126,7 @@ def visualize_inlier_loop_pairs(graph, max_clique, loop_queue):
     """
     Visualize the graph with the maximum clique highlighted as inliers and display loop pair information.
     """
-    pos = nx.circular_layout(graph)
+    pos = nx.spring_layout(graph, seed=84)  # Use fixed seed for consistent layout
     max_clique_subgraph = graph.subgraph(max_clique)
 
     plt.figure(figsize=(10, 8))
