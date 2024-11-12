@@ -19,9 +19,13 @@ Red-dotted lines are false-positive loop pair, and Green-dotted lines show true-
 
 ### Adjacency matrix and Consistency Graph Generation
 The generated loop-pair now is appended into loop_queue, which does not distinctly sort the true or false positivity.
-Here we designate a threshold that determines rather the consistency is over or under threshold. The error metric is defined from the beginning, which is a mahalanobis distance defined as a covariance function.
+
+Here we designate a threshold that determines rather the consistency is over or under threshold. 
+
+The error metric is defined from the beginning, which is a mahalanobis distance defined as a covariance function.
 By comparing the consistency, we append the binary value to the adjacency matrix considering pairwise information and error, respectively. 
 (adjacency matrix is a square matrix used to represent a graph. The elements of the matrix indicate whether pairs of nodes are adjacent or connected)
+
 This repository only checks the upper triangular part of the pcm_matrix.
 
 
