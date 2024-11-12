@@ -1,11 +1,6 @@
 # PCM_gtsam
 Visual representation and example of pairwise consistency maximization of factor-graph (Pose-graph). Utilizes Networkx, GTSAM, python for optimization.
-PCM requires several assumption and metric to determine if two inter-robot measurement $\mathbf{z}_{ik}^{ab}$ 
-and 
-<p>
-  $\mathbf{z}_{jl}^{ab}$ 
-</p> 
-are pairwise consistent
+PCM requires several assumption and metric to determine if two inter-robot measurement $\mathbf{z}_{ik}^{ab}$ and $\mathbf{z}_{jl}^{ab}$ are pairwise consistent
 Covariance function of inter-robot loop-pair is defined as following:
 <p align="center">
 $\mathcal{C} \left( \mathbf{z}_{ik}^{ab}, \mathbf{z}_{jl}^{ab} \right) = \left\lVert \left( \ominus \mathbf{z}_{ik}^{ab} \right) \oplus \hat{\mathbf{x}}_{ij}^{a} \oplus \mathbf{z}_{jl}^{ab} \oplus \hat{\mathbf{x}}_{lk}^{b} \right\rVert_{\Sigma} \triangleq \left\lVert \boldsymbol{\epsilon}_{ikjl} \right\rVert_{\Sigma_{ikjl}}$
