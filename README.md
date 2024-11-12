@@ -17,6 +17,17 @@ Red-dotted lines are false-positive loop pair, and Green-dotted lines show true-
   <img src="figure/Figure_1.png" alt="GTSAM Version of Covariance Propagation" width="720"/>
 </p>
 
+### Adjacency matrix and Consistency Graph Generation
+The generated loop-pair now is appended into loop_queue, which does not distinctly sort the true or false positivity.
+Here we designate a threshold that determines rather the consistency is over or under threshold. The error metric is defined from the beginning, which is a mahalanobis distance defined as a covariance function.
+By comparing the consistency, we append the binary value to the adjacency matrix considering pairwise information and error, respectively. 
+
+Here, we only monitor the upper-right values of the matrix.
+
+<p align="center">
+  <img src="figure/adjacency.png" alt="Adjacency" width="720"/>
+</p>
+
 
 With the loop pair between inter robot, the covariance propagation iteratively occurs due to optimization.
 ### GTSAM Version of Covariance Propagation
