@@ -1,5 +1,10 @@
 # PCM_gtsam
 Visual representation and example of pairwise consistency maximization of factor-graph (Pose-graph). Utilizes Networkx, GTSAM, python for optimization.
+All pose and graph structures are represented in Pose3, Rot3, Point3, and etc. provided in GTSAM.
+Further applications including optimization and comparison of before and after outlier rejection will be updated(2024/11/12)
+
+
+### What is PCM?
 PCM requires several assumption and metric to determine 
 if two inter-robot measurement **z**<sub>ik</sub><sup>ab</sup> and **z**<sub>jl</sub><sup>ab</sup> are pairwise consistent
 Covariance function of inter-robot loop-pair is defined as following:
@@ -33,6 +38,24 @@ This repository only checks the upper triangular part of the pcm_matrix.
   <img src="figure/adjacency_matrix.png" alt="Adjacency" width="720"/>
 </p>
 
+### Maximum Clique
+Reference : [Maximum Clique](https://learn.microsoft.com/en-us/archive/msdn-magazine/2011/october/test-run-graph-structures-and-maximum-clique) 
+A clique is a subset of a graph where every node is connected to every other node.
+
+The maximum clique problem is to find the clique with the largest size in a graph.
+
+Based on the consistency graph, we now apply maximum-clique assumption for consistency in graph, and reject outliers that does not fullfill the clique problem in our loop-pair
+
+<p align="center">
+  <img src="figure/maximum_clique.png" alt="Adjacency" width="720"/>
+</p>
+
+### Final Step
+After the maximum-clique, we now obtain set of loop-pairs with outliers removed. Now, we can get reliable loop-pairs via pairwise consistency check. 
+
+<p align="center">
+  <img src="figure/Figure_2.png" alt="GTSAM Version of Covariance Propagation" width="720"/>
+</p>
 
 With the loop pair between inter robot, the covariance propagation iteratively occurs due to optimization.
 ### GTSAM Version of Covariance Propagation
