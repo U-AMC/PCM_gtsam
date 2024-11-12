@@ -7,6 +7,9 @@ Covariance function of inter-robot loop-pair is defined as following:
 $\mathcal{C} \left( \mathbf{z}_{ik}^{ab}, \mathbf{z}_{jl}^{ab} \right) = \left\lVert \left( \ominus \mathbf{z}_{ik}^{ab} \right) \oplus \hat{\mathbf{x}}_{ij}^{a} \oplus \mathbf{z}_{jl}^{ab} \oplus \hat{\mathbf{x}}_{lk}^{b} \right\rVert_{\Sigma} \triangleq \left\lVert \boldsymbol{\epsilon}_{ikjl} \right\rVert_{\Sigma_{ikjl}}$
 </p>
 
+
+With the loop pair between inter robot, the covariance propagation iteratively occurs due to optimization.
+### GTSAM Version of Covariance Propagation
 <p align="center">
   <img src="figure/gt_propagation.png" alt="GTSAM Version of Covariance Propagation" width="1080"/>
 </p>
