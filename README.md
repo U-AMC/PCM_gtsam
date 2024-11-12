@@ -8,14 +8,7 @@ $\mathcal{C} \left( \mathbf{z}_{ik}^{ab}, \mathbf{z}_{jl}^{ab} \right) = \left\l
 </p>
 
 <p align="center">
-  <img src="figure/gt_propagation.png" alt="GTSAM Version of Covariance Propagation" width="200"/>
-</p>
-
-
-
-### Networkx Version of Covariance Propagation
-<p align="center">
-  <img src="figure/propagation.png" />
+  <img src="figure/gt_propagation.png" alt="GTSAM Version of Covariance Propagation" width="1080"/>
 </p>
 
 
