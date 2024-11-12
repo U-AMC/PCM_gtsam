@@ -9,6 +9,7 @@ $\mathcal{C} \left( \mathbf{z}_{ik}^{ab}, \mathbf{z}_{jl}^{ab} \right) = \left\l
 
 ### Initial Step
 We generate a set of pose-graph of two adjacent robot that intersect each other in SE(3).
+
 Each robot is denoted as Robot1 and Robot2, as figure shows.
 <p align="center">
   <img src="figure/Figure_1.png" alt="GTSAM Version of Covariance Propagation" width="1080"/>
