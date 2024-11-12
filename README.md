@@ -1,6 +1,6 @@
 # PCM_gtsam
 Visual representation and example of pairwise consistency maximization of factor-graph (Pose-graph). Utilizes Networkx, GTSAM, python for optimization.
-PCM requires several assumption and metric to determine if two inter-robot measurement <p> $\mathbf{z}_{ik}^{ab}$ </p> 
+PCM requires several assumption and metric to determine if two inter-robot measurement $\mathbf{z}_{ik}^{ab}$ 
 and 
 <p>
   $\mathbf{z}_{jl}^{ab}$ 
