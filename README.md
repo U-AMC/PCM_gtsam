@@ -5,6 +5,10 @@ Further applications including optimization and comparison of before and after o
 
 
 ### What is PCM?
+Pairwise Consistent Measurement Set Maximization (PCM) technique proposed by Mangelson et al. for outlier rejection and tailor it to a fully distributed setup.
+PCM checks if pairs of inter-robot loop closures are consistent with each other, and then search for a large set of mutually-consistent loop closures. (DOOR-SLAM)
+
+
 PCM requires several assumption and metric to determine 
 if two inter-robot measurement **z**<sub>ik</sub><sup>ab</sup> and **z**<sub>jl</sub><sup>ab</sup> are pairwise consistent
 Covariance function of inter-robot loop-pair is defined as following:
