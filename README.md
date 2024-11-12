@@ -26,7 +26,7 @@ This repository only checks the upper triangular part of the pcm_matrix.
 
 
 <p align="center">
-  <img src="figure/adjacency.png" alt="Adjacency" width="720"/>
+  <img src="figure/adjacency_matrix.png" alt="Adjacency" width="720"/>
 </p>
 
 
