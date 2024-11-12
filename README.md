@@ -45,6 +45,7 @@ This repository only checks the upper triangular part of the pcm_matrix.
 
 ### Maximum Clique
 Reference : [Maximum Clique](https://learn.microsoft.com/en-us/archive/msdn-magazine/2011/october/test-run-graph-structures-and-maximum-clique) 
+
 A clique is a subset of a graph where every node is connected to every other node.
 
 The maximum clique problem is to find the clique with the largest size in a graph.
