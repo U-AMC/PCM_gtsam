@@ -36,8 +36,8 @@ class GTSAMPCMConfig:
     seed: int = 0
     num_poses: int = 20
     yaw_increment: float = 0.01
-    max_distance: float = 5.5
-    pcm_threshold: float = 5.0
+    max_distance: float = 7.5
+    pcm_threshold: float = 4.0
     intensity: float = 1.0
     num_loop_attempts: int = 40
     true_positive_attempts: int = 30

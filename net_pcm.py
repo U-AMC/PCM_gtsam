@@ -51,18 +51,64 @@ def generate_adjacency_matrix(loop_queue, pcm_threshold=5.0, intensity=1.0):
         return np.zeros((0, 0))
     adjacency_matrix = np.zeros((loop_count, loop_count))
 
+    def _to_rot_trans(pose):
+        """Split [roll, pitch, yaw, x, y, z] into (Rotation, ndarray)."""
+        return R.from_euler('xyz', pose[:3]), np.array(pose[3:], dtype=np.float64)
+
+    def se3_compose(pose1, pose2):
+        """Proper SE(3) composition: P1 ∘ P2."""
+        r1, t1 = _to_rot_trans(pose1)
+        r2, t2 = _to_rot_trans(pose2)
+        r = r1 * r2
+        t = r1.apply(t2) + t1
+        return list(r.as_euler('xyz')) + list(t)
+
+    def se3_inverse(pose):
+        """SE(3) inverse: P^{-1}."""
+        r, t = _to_rot_trans(pose)
+        r_inv = r.inv()
+        return list(r_inv.as_euler('xyz')) + list(-r_inv.apply(t))
+
     def pose3_between(pose1, pose2):
-        r1 = R.from_euler('xyz', pose1[:3])
-        r2 = R.from_euler('xyz', pose2[:3])
-        relative_rotation = r1.inv() * r2
-        relative_translation = np.array(pose2[3:]) - np.array(pose1[3:])
-        return list(relative_rotation.as_euler('xyz')) + list(relative_translation)
+        """SE(3) between: P1^{-1} ∘ P2."""
+        return se3_compose(se3_inverse(pose1), pose2)
+
+    def se3_logmap(pose):
+        """Proper SE(3) Logmap: [omega, J^{-1}(omega) @ t]."""
+        r, t = _to_rot_trans(pose)
+        omega = r.as_rotvec()
+        theta = np.linalg.norm(omega)
+
+        if theta < 1e-10:
+            # Near identity: J^{-1} ≈ I
+            v = t
+        else:
+            # Skew-symmetric matrix of omega.
+            W = np.array([
+                [0, -omega[2], omega[1]],
+                [omega[2], 0, -omega[0]],
+                [-omega[1], omega[0], 0],
+            ])
+            W2 = W @ W
+            # Inverse left Jacobian of SO(3).
+            J_inv = (
+                np.eye(3)
+                - 0.5 * W
+                + (1.0 / theta**2 - (1.0 + np.cos(theta)) / (2.0 * theta * np.sin(theta))) * W2
+            )
+            v = J_inv @ t
+
+        return np.concatenate([omega, v])
 
     def residualPCM(inter_jk, inter_il, inner_ij, inner_kl, intensity):
-        v = np.array([intensity] * 6)
-        m_cov = np.diag(v)
-        res_pose = [ij + jk + kl - il for ij, jk, kl, il in zip(inner_ij, inter_jk, inner_kl, inter_il)]
-        res_vec = np.array(res_pose, dtype=np.float64)
+        """PCM residual via proper SE(3) loop composition + Logmap."""
+        inter_il_inv = se3_inverse(inter_il)
+        res_pose = se3_compose(
+            se3_compose(se3_compose(inner_ij, inter_jk), inner_kl),
+            inter_il_inv,
+        )
+        res_vec = se3_logmap(res_pose)
+        m_cov = np.diag(np.full(6, intensity))
         return np.sqrt(res_vec.T @ m_cov @ res_vec)
 
     for i, j in itertools.combinations(range(loop_count), 2):
