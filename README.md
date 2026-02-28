@@ -345,17 +345,44 @@ MPLBACKEND=Agg MPLCONFIGDIR=/tmp python3 -m pytest tests/test_net_pcm.py::test_c
 ---
 
 ## References and Further Reading
+---
+For those who seek reference
 
-If you want to dive deeper into the theory behind PCM and multi-robot SLAM:
 
-1. **Mangelson et al.** — "Pairwise Consistent Measurement Set Maximization for Robust Multi-Robot Map Merging," *ICRA 2018.*
-   The original PCM paper. Start here.
+Studying PGO concept with [nano-pgo](https://github.com/gisbi-kim/nano-pgo) from [Giseop Kim](https://github.com/gisbi-kim)
+```
+R. Smith, M. Self and P. Cheeseman,
+"Estimating uncertain spatial relationships in robotics," Proceedings.
+ 1987 IEEE International Conference on Robotics and Automation, Raleigh, NC, USA, 1987, pp. 850-850,
+ doi: 10.1109/ROBOT.1987.1087846. keywords: {Robots},
 
-2. **Lajoie et al.** — "DOOR-SLAM: Distributed, Online, and Outlier Resilient SLAM for Robotic Teams," *RA-L 2020.*
-   Applies PCM in a distributed SLAM system.
+Y. Huang, T. Shan, F. Chen and B. Englot,
+"DiSCo-SLAM: Distributed Scan Context-Enabled Multi-Robot LiDAR SLAM With Two-Stage Global-Local Graph Optimization,"
+IEEE Robotics and Automation Letters, vol. 7, no. 2, pp. 1150-1157, April 2022,
+doi: 10.1109/LRA.2021.3138156. keywords: {Robots;Robot kinematics;Simultaneous localization and mapping;Laser radar;Optimization;Robot sensing systems;Feature extraction;Multi-robot SLAM;distributed robot systems;range sensing},
 
-3. **Huang et al.** — "DiSCo-SLAM," *RA-L 2022.*
-   Uses PCM as part of a larger multi-robot SLAM framework.
+@inproceedings{mangelsonPairwiseConsistentMeasurement2018,
+  title = {Pairwise {{Consistent Measurement Set Maximization}} for {{Robust Multi-Robot Map Merging}}},
+  booktitle = {2018 {{IEEE International Conference}} on {{Robotics}} and {{Automation}} ({{ICRA}})},
+  author = {Mangelson, Joshua G. and Dominic, Derrick and Eustice, Ryan M. and Vasudevan, Ram},
+  year = {2018},
+  month = may,
+  pages = {2916--2923},
+  issn = {2577-087X},
+  doi = {10.1109/ICRA.2018.8460217}
+}
 
-4. **Smith et al.** — "Estimating uncertain spatial relationships in robotics," *ICRA 1987.*
-   Foundational work on uncertainty representation in robotics (relevant to the covariance propagation part).
+@article{lajoieDOORSLAMDistributedOnline2020,
+  title = {{{DOOR}}-{{SLAM}}: {{Distributed}}, {{Online}}, and {{Outlier Resilient SLAM}} for {{Robotic Teams}}},
+  shorttitle = {{{DOOR}}-{{SLAM}}},
+  author = {Lajoie, Pierre-Yves and Ramtoula, Benjamin and Chang, Yun and Carlone, Luca and Beltrame, Giovanni},
+  year = {2020},
+  month = apr,
+  volume = {5},
+  pages = {1656--1663},
+  issn = {2377-3766},
+  doi = {10.1109/LRA.2020.2967681},
+  number = {2}
+}
+
+```
