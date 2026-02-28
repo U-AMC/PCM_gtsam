@@ -1,14 +1,38 @@
-# Import necessary libraries
-import numpy as np
-import pandas as pd
-import networkx as nx
-from scipy.spatial.transform import Rotation as R
-import matplotlib.pyplot as plt
-from networkx.algorithms.clique import find_cliques
 import itertools
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from typing import NamedTuple
 
-# Set random seed for consistency
-np.random.seed(42)
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+from scipy.spatial.transform import Rotation as R
+
+from pcm_common import (
+    apply_maximum_clique,
+    compute_metrics,
+    generate_consistency_graph,
+    parse_clique_indices,
+    save_run_artifacts,
+)
+
+
+@dataclass
+class NetPCMConfig:
+    seed: int = 42
+    pcm_threshold: float = 5.0
+    intensity: float = 1.0
+    visualize: bool = True
+    save_results: bool = True
+    output_dir: str = "results"
+    run_tag: str = "net_pcm_demo"
+
+
+class NetLoopClosure(NamedTuple):
+    idx_a: int
+    idx_b: int
+    relative_pose: list
+
 
 # Step 1: Import Loop Pair Information
 def import_loop_pairs(loop_queue):
@@ -23,6 +47,8 @@ def generate_adjacency_matrix(loop_queue, pcm_threshold=5.0, intensity=1.0):
     Generate the adjacency matrix from loop pair information based on consistency checks.
     """
     loop_count = len(loop_queue)
+    if loop_count == 0:
+        return np.zeros((0, 0))
     adjacency_matrix = np.zeros((loop_count, loop_count))
 
     def pose3_between(pose1, pose2):
@@ -57,28 +83,6 @@ def generate_adjacency_matrix(loop_queue, pcm_threshold=5.0, intensity=1.0):
 
     return adjacency_matrix
 
-# Step 3: Generate Consistency Graph
-def generate_consistency_graph(adjacency_matrix):
-    """
-    Generate the consistency graph based on the adjacency matrix.
-    """
-    loop_count = len(adjacency_matrix)
-    graph = nx.Graph()
-    graph.add_nodes_from([f"Loop {i}" for i in range(loop_count)])
-    for i in range(loop_count):
-        for j in range(i + 1, loop_count):
-            if adjacency_matrix[i, j] == 1:
-                graph.add_edge(f"Loop {i}", f"Loop {j}")
-    return graph
-
-# Step 4: Apply Maximum Clique Problem
-def apply_maximum_clique(graph):
-    """
-    Apply the maximum clique algorithm to find the largest set of mutually consistent loop closures.
-    """
-    all_cliques = list(find_cliques(graph))
-    max_clique = max(all_cliques, key=len)
-    return max_clique
 
 # Step 5: Visualize Initial Pose Graph with Odometry and Loop Closures
 def visualize_initial_pose_graph(loop_queue):
@@ -126,6 +130,10 @@ def visualize_inlier_loop_pairs(graph, max_clique, loop_queue):
     """
     Visualize the graph with the maximum clique highlighted as inliers and display loop pair information.
     """
+    if graph.number_of_nodes() == 0:
+        print("Consistency graph is empty. No inlier loop pairs to visualize.")
+        return
+
     pos = nx.spring_layout(graph, seed=84)  # Use fixed seed for consistent layout
     max_clique_subgraph = graph.subgraph(max_clique)
 
@@ -136,6 +144,10 @@ def visualize_inlier_loop_pairs(graph, max_clique, loop_queue):
     plt.show()
 
     # Display loop pair information for the maximum clique
+    if not max_clique:
+        print("No maximum clique found. No inlier loop pairs.")
+        return
+
     print("Loop Pairs in Maximum Clique:")
     for idx in max_clique:
         loop_id = int(idx.split()[1])
@@ -147,11 +159,15 @@ def generate_corrected_inlier_loop_pairs(max_clique, loop_queue):
     """
     Generate the loop pair information for the corrected inlier loop closures.
     """
+    if not max_clique or not loop_queue:
+        return []
+
     corrected_inliers = []
     for idx in max_clique:
         loop_id = int(idx.split()[1])
-        id_0, id_1, relative_pose = loop_queue[loop_id]
-        corrected_inliers.append((id_0, id_1, relative_pose))
+        if loop_id >= len(loop_queue):
+            continue
+        corrected_inliers.append(loop_queue[loop_id])
     return corrected_inliers
 
 # Step 8: Visualize Inlier Only Pose Graph
@@ -195,30 +211,42 @@ def visualize_inlier_only_pose_graph(loop_queue, corrected_inliers):
     plt.axis('off')
     plt.show()
 
-# Example Usage
-if __name__ == "__main__":
-    # Example loop pair information (id_0, id_1, relative_pose)
+def get_example_loop_data():
     loop_queue_example = [
-        (0, 5, [0, 0, 0, 1, 0, 0]),
-        (1, 7, [0, 0.1, 0, 1, 1, 0]),
-        (2, 6, [0.2, 0, 0, 0, 1, 1]),
-        (3, 8, [0, 0.1, -0.1, 2, 2, 0]),
-        (4, 9, [0, 0, 0, 3, 3, 1]),
-        (0, 6, [0, -0.1, 0, 1, 0, 1]),
-        (1, 8, [0.1, 0, 0, 2, 1, 0]),
-        (2, 9, [-0.1, 0, 0, 1, 2, 1]),
-        (3, 7, [0.1, -0.1, 0, 2, 1, 1]),
-        (4, 5, [0, 0.1, 0, 3, 0, 1])
+        NetLoopClosure(0, 5, [0, 0, 0, 1, 0, 0]),
+        NetLoopClosure(1, 7, [0, 0.1, 0, 1, 1, 0]),
+        NetLoopClosure(2, 6, [0.2, 0, 0, 0, 1, 1]),
+        NetLoopClosure(3, 8, [0, 0.1, -0.1, 2, 2, 0]),
+        NetLoopClosure(4, 9, [0, 0, 0, 3, 3, 1]),
+        NetLoopClosure(0, 6, [0, -0.1, 0, 1, 0, 1]),
+        NetLoopClosure(1, 8, [0.1, 0, 0, 2, 1, 0]),
+        NetLoopClosure(2, 9, [-0.1, 0, 0, 1, 2, 1]),
+        NetLoopClosure(3, 7, [0.1, -0.1, 0, 2, 1, 1]),
+        NetLoopClosure(4, 5, [0, 0.1, 0, 3, 0, 1])
     ]
+    # Ground-truth labels for the synthetic set above.
+    loop_truth_labels = [True, True, True, True, False, True, False, True, False, False]
+    return loop_queue_example, loop_truth_labels
 
-    # Step 1: Import loop pair information
+
+def run_demo(config=None):
+    if config is None:
+        config = NetPCMConfig()
+
+    np.random.seed(config.seed)
+    loop_queue_example, loop_truth_labels = get_example_loop_data()
     loop_queue = import_loop_pairs(loop_queue_example)
 
-    # Step 5: Visualize initial pose graph with odometry and loop closures
-    visualize_initial_pose_graph(loop_queue)
+    if config.visualize:
+        # Step 5: Visualize initial pose graph with odometry and loop closures
+        visualize_initial_pose_graph(loop_queue)
 
     # Step 2: Generate adjacency matrix
-    adjacency_matrix = generate_adjacency_matrix(loop_queue)
+    adjacency_matrix = generate_adjacency_matrix(
+        loop_queue,
+        pcm_threshold=config.pcm_threshold,
+        intensity=config.intensity,
+    )
 
     # Step 3: Generate consistency graph
     consistency_graph = generate_consistency_graph(adjacency_matrix)
@@ -226,14 +254,51 @@ if __name__ == "__main__":
     # Step 4: Apply maximum clique problem
     max_clique = apply_maximum_clique(consistency_graph)
 
-    # Step 6: Visualize inlier loop pairs and loop pair information
-    visualize_inlier_loop_pairs(consistency_graph, max_clique, loop_queue)
+    if config.visualize:
+        # Step 6: Visualize inlier loop pairs and loop pair information
+        visualize_inlier_loop_pairs(consistency_graph, max_clique, loop_queue)
 
     # Step 7: Generate loop pair information for corrected inlier loop closures
     corrected_inlier_loop_pairs = generate_corrected_inlier_loop_pairs(max_clique, loop_queue)
     print("\nCorrected Inlier Loop Pairs:")
     for pair in corrected_inlier_loop_pairs:
-        print(f"Loop Pair: ({pair[0]}, {pair[1]}), Relative Pose: {pair[2]}")
+        print(f"Loop Pair: ({pair.idx_a}, {pair.idx_b}), Relative Pose: {pair.relative_pose}")
 
-    # Step 8: Visualize inlier only pose graph
-    visualize_inlier_only_pose_graph(loop_queue, corrected_inlier_loop_pairs)
+    if config.visualize:
+        # Step 8: Visualize inlier only pose graph
+        visualize_inlier_only_pose_graph(loop_queue, corrected_inlier_loop_pairs)
+
+    selected_indices = parse_clique_indices(max_clique)
+    metrics = compute_metrics(selected_indices, loop_truth_labels, len(loop_queue))
+    run_results = {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "config": asdict(config),
+        "max_clique": list(max_clique),
+        "max_clique_size": int(len(max_clique)),
+        "selected_indices": selected_indices,
+        "truth_labels": loop_truth_labels,
+        "metrics": metrics,
+    }
+
+    print("\nRun Metrics:")
+    print(
+        "Precision={:.3f}, Recall={:.3f}, F1={:.3f}, RejectionRatio={:.3f}, MaxCliqueSize={}".format(
+            metrics["precision"],
+            metrics["recall"],
+            metrics["f1"],
+            metrics["rejection_ratio"],
+            len(max_clique),
+        )
+    )
+
+    if config.save_results:
+        run_id, json_path, csv_path = save_run_artifacts(run_results, config.output_dir, config.run_tag)
+        print(f"Saved run artifacts: run_id={run_id}")
+        print(f"- JSON: {json_path}")
+        print(f"- CSV:  {csv_path}")
+
+    return run_results
+
+
+if __name__ == "__main__":
+    run_demo()
